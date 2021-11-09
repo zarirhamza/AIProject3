@@ -34,12 +34,12 @@ class Maze:
                 if p <= 0.3:
                     mat[i][j] = 'X'  # Blocked
                 else:
-                    terrain = np.random.randint(3)
-                    if terrain == 0:
+                    terrain = random.uniform(0, 1)# Change probabilities to affect terrain generation
+                    if terrain <= 0.33:
                         mat[i][j] = "L"  # Flat
-                    elif terrain == 1:
+                    elif 0.33 < terrain <= 0.67:
                         mat[i][j] = "H"  # Hilly
-                    elif terrain == 2:
+                    elif terrain > 0.67: 
                         mat[i][j] = "F"  # Forest
 
         terrain = np.random.randint(3)
