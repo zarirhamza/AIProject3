@@ -57,7 +57,7 @@ class Maze:
             x = np.random.randint(self.dim)
             y = np.random.randint(self.dim)
 
-            if self.targetType is None:
+            if self.targetType is None or self.targetType == "random":
                 if self.maze[y][x] != 'X':
                     return x, y
 

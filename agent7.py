@@ -32,6 +32,12 @@ class Agent7:
             0: 0
         }
 
+        global iterations
+        iterations = 0
+
+        global cellsProcessed
+        cellsProcessed = 0
+
     """
     mDistance - Calculates Manhattan Distance between two points
     """
@@ -209,8 +215,6 @@ class Agent7:
         for i in range(len(path)):
 
             global iterations
-            iterations += 1
-
             newCell = False
 
             # Update knowledge if cell is unvisited
@@ -224,12 +228,14 @@ class Agent7:
                 p = random.uniform(0, 1)
                 # print("Terrain FNR: ", terrainFNR, " Probability: ", p)
                 if p > terrainFNR:
+                    iterations += 1
                     self.probMatrix = np.zeros([self.dim, self.dim], dtype=object)
                     self.probMatrix[path[i][1]][path[i][0]] = 1
                     return True, path[i]
 
             # If blockage found, update knowledge and stop path
             if newCell and self.blankMaze[path[i][1]][path[i][0]] == 'X':
+                iterations += 1
                 self.probMatrix[path[i][1]][path[i][0]] = 0
                 self.probMatrix = np.asarray([
                     [val if val == 0 else val + (1 / (self.numUnblocked * (self.numUnblocked - 1))) for val in row] for
@@ -246,6 +252,7 @@ class Agent7:
 
             # Otherwise move into new cell in path and update probability based on Q2
             elif i > 0 or i == len(path) - 1:
+                iterations += 1
                 self.probMatrix[path[i][1]][path[i][0]] *= self.FNRMapping[self.blankMaze[path[i][1]][path[i][0]]]
                 probSum = np.sum(self.probMatrix)
                 self.probMatrix = self.probMatrix / probSum
