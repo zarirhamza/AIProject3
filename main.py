@@ -26,8 +26,8 @@ def main():
     A7Time = 0
     A8Time = 0
 
-    N = 1 #Times test is run
-    Dimension = 10 #Dimension of the matrix
+    N = 10 #Times test is run
+    Dimension = 25 #Dimension of the matrix
     TargetType = "random"# "random" // "forest" // "hill" // "flat"
 
     for i in range(N):
@@ -37,7 +37,7 @@ def main():
         while not m.DFSSolve((0, 0), m.target):
             m = Maze(Dimension, TargetType)
 
-        m.plotMaze()
+        #m.plotMaze()
 
         a6 = Agent6(m)
         a7 = Agent7(m)

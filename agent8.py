@@ -124,15 +124,25 @@ class Agent8:
             elif not discovered and stopPoint == (-1, -1):
                 iterations += 1
 
+                #print(self.fullMaze)
+                #print(self.blankMaze)
+                #print(self.numUnblocked)
+                #print(self.probMatrix)
+                #print(closedList)
+                #print(len(closedList))
+
                 #mark everything not in closed list as impossible to reach
                 for i in range(self.dim):
                     for j in range(self.dim):
-                        if len([item for item in fringe if item[1] == i and item[2] == j]) == 0:
-                            self.probMatrix[j][i] = 0
-                            self.probMatrix = np.asarray([
-                                [val if val == 0 else val + (1 / (self.numUnblocked * (self.numUnblocked - 1))) for val in row] for
-                                row in self.probMatrix], dtype=object)
-                            self.numUnblocked -= 1
+                        if len([item for item in closedList if item[1] == i and item[2] == j]) == 0:
+
+                            #print("i: {} and j: {} where closedList is there".format(i,j))
+                            if self.probMatrix[j][i] != 0:
+                                self.probMatrix[j][i] = 0
+                                self.probMatrix = np.asarray([
+                                    [val if val == 0 else val + (1 / (self.numUnblocked * (self.numUnblocked - 1))) for val in row] for
+                                    row in self.probMatrix], dtype=object)
+                                self.numUnblocked -= 1
 
                 start = (0, currentCell[0], currentCell[1])
                 fringe = [start]
@@ -185,10 +195,10 @@ class Agent8:
             elif maze[newyc][newxc] == 'X':  # add only if open
                 continue
 
-            elif len([item for item in closedList if item[1] == newxc and item[2] == newyc and item[0] < newfn]) > 0:
+            elif len([item for item in closedList if item[1] == newxc and item[2] == newyc and item[0] <= newfn]) > 0:
                 continue
 
-            elif len([item for item in fringe if item[1] == newxc and item[2] == newyc and item[0] < newfn]) > 0:
+            elif len([item for item in fringe if item[1] == newxc and item[2] == newyc and item[0] <= newfn]) > 0:
                 continue
 
             gn[newyc][newxc] = (newgn, (xc, yc))

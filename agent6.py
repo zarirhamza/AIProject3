@@ -194,10 +194,10 @@ class Agent6:
             elif maze[newyc][newxc] == 'X':  # add only if open
                 continue
 
-            elif len([item for item in closedList if item[1] == newxc and item[2] == newyc and item[0] < newfn]) > 0:
+            elif len([item for item in closedList if item[1] == newxc and item[2] == newyc and item[0] <= newfn]) > 0:
                 continue
 
-            elif len([item for item in fringe if item[1] == newxc and item[2] == newyc and item[0] < newfn]) > 0:
+            elif len([item for item in fringe if item[1] == newxc and item[2] == newyc and item[0] <= newfn]) > 0:
                 continue
 
             gn[newyc][newxc] = (newgn, (xc, yc))
