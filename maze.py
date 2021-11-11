@@ -15,12 +15,12 @@ class Maze:
         self.dim = dim
         self.target = ()
         self.maze = self.createMaze()
-        #self.maze = np.array([['L', 'X', 'F'], ['F', 'X', 'F'], ['F', 'F', 'L']])
+        #self.maze = np.array([['H', 'H', 'X'], ['F', 'X', 'F'], ['L', 'X', 'F']])
 
         # Make the target
         self.targetType = targetType
         self.target = self.createTarget()
-        #self.target = (2, 1)
+        #self.target = (0, 1)
 
     """
     createMaze - Fill out map matrix with values representing terrain and target

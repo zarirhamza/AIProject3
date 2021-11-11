@@ -95,8 +95,9 @@ class Agent7:
         stackPath = []
         currentCell = (0, 0)
         start = (0, currentCell[0], currentCell[1])
-        fringe = []
-        hq.heappush(fringe, start)
+        fringe = [start]
+        hq.heapify(fringe)
+        closedList = []
         gn = [[(np.inf, None) for i in range(self.dim)] for j in range(self.dim)]
         gn[currentCell[1]][currentCell[0]] = (0, None)
         global iterations
@@ -107,7 +108,7 @@ class Agent7:
             tempTarget = self.bestCell(currentCell)
 
             # A* to max Cell
-            self.helperAStar(self.blankMaze, tempTarget, self.mDistanceHeurisitic, fringe, gn)
+            self.helperAStar(self.blankMaze, tempTarget, self.mDistanceHeurisitic, fringe, gn, closedList)
             path = self.createPath(currentCell, tempTarget, gn)
 
             # Iterate through planned path while updating values
@@ -134,8 +135,9 @@ class Agent7:
                      for val in row] for row in self.probMatrix], dtype=object)
 
                 start = (0, currentCell[0], currentCell[1])
-                fringe = []
-                hq.heappush(fringe, start)
+                fringe = [start]
+                hq.heapify(fringe)
+                closedList = []
                 gn = [[(np.inf, None) for i in range(self.dim)] for j in range(self.dim)]
                 gn[currentCell[1]][currentCell[0]] = (0, (gn[currentCell[1]][currentCell[0]][1]))
 
@@ -143,8 +145,9 @@ class Agent7:
             else:
                 currentCell = stopPoint
                 start = (0, stopPoint[0], stopPoint[1])
-                fringe = []
-                hq.heappush(fringe, start)
+                fringe = [start]
+                hq.heapify(fringe)
+                closedList = []
                 gn = [[(np.inf, None) for i in range(self.dim)] for j in range(self.dim)]
                 gn[stopPoint[1]][stopPoint[0]] = (0, (gn[stopPoint[1]][stopPoint[0]][1]))
 
@@ -157,32 +160,53 @@ class Agent7:
         #input()
 
     """
-    createChildren - Generates children of given point and stores in (gn,x,y) form in fringe when needed 
+    createChildren - Generates children of given point and stores in (fn,x,y) form in fringe when needed 
     :param x: Point to generate children
     :param maze: Grid to solve with blocked/unblocked cells
     :param G: Goal Point
     :param heuristic: Heuristic calculation method
     :param fringe: Priority Queue of different cells
     :param gn: Matrix containing distances of all cells and parents
+    :param closedList: List containg visited cells
     """
-    def createChildren(self, x, maze, G, heuristic, fringe, gn):
+    def createChildren(self, x, maze, G, heuristic, fringe, gn, closedList):
         xc = x[1]
         yc = x[2]
-        newgn = gn[yc][xc][0] + 1  # note that python matrix storage is not normal x,y graph coordinates
+
+        #print("gn is {}".format(gn))
+        #print("closedList is {}".format(closedList))
 
         # generate legal children for all 4 possible moves based on origin point
         for direction in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
             newxc = direction[0] + xc
             newyc = direction[1] + yc
 
+            newgn = gn[yc][xc][0] + 1
+            newfn = heuristic((newxc, newyc), G) + newgn
+
+            #print("Children is: {} with gn of {} and fn of {}".format((newxc, newyc), newgn, newfn))
+            #input()
+
             if newxc >= self.dim or newxc < 0 or newyc >= self.dim or newyc < 0:  # Legal within bounds children only!
                 continue
 
-            oldgn = gn[newyc][newxc][0]
-            if newgn < oldgn and maze[newyc][newxc] != 'X':  # add only if improved distance and open
-                gn[newyc][newxc] = (newgn, (xc, yc))  # store new gn and parent coords
-                item = (heuristic((newxc, newyc), G, gn), newxc, newyc)  # store value based on heuristic and x,y coords
-                hq.heappush(fringe, item)
+            elif maze[newyc][newxc] == 'X':  # add only if open
+                continue
+
+            elif len([item for item in closedList if item[1] == newxc and item[2] == newyc and item[0] < newfn]) > 0:
+                continue
+
+            elif len([item for item in fringe if item[1] == newxc and item[2] == newyc and item[0] < newfn]) > 0:
+                continue
+
+            gn[newyc][newxc] = (newgn, (xc, yc))
+            item = (newfn, newxc, newyc)
+            hq.heappush(fringe, item)
+
+            if newxc == G[0] and newyc == G[1]:
+                #print("Goal found")
+                return
+
         return
 
     """
@@ -192,19 +216,25 @@ class Agent7:
     :param heuristic: Heuristic calculation method
     :param fringe: Priority Queue of different cells
     :param gn: Matrix containing distances of all cells and parents
+    :param closedList: List containg visited cells
     """
-    def helperAStar(self, maze, G, heuristic, fringe, gn):
+    def helperAStar(self, maze, G, heuristic, fringe, gn, closedList):
         if not fringe:  # check for empty fringe meaning no remaining paths to check
             return
 
         while fringe:
+            #print("fringe is {}".format(fringe))
+
             global cellsProcessed
             cellsProcessed += 1
             x = hq.heappop(fringe)  # pop first element and check if goal otherwise create children and call again
-            # print(x)
+            closedList.append(x)
+            #print("lowest fn of fringe is {}".format(x))
+
             if x[1] == G[0] and x[2] == G[1]:
+                #print(gn)
                 return
-            self.createChildren(x, maze, G, heuristic, fringe, gn)
+            self.createChildren(x, maze, G, heuristic, fringe, gn, closedList)
         return
 
     """
@@ -327,14 +357,12 @@ class Agent7:
     mDistance - calculates manhattan distance from goal
     :param x: point whose priority will be evaluated
     :param G: goal
-    :param distances: array storing distances spaces are from the start
     :return: priority number based on speed
     """
-
-    def mDistanceHeurisitic(self, x, G, distances):
+    def mDistanceHeurisitic(self, x, G):
         xCoord = x[0]
         yCoord = x[1]
         xdist = G[0] - xCoord
         ydist = G[1] - yCoord
         h = abs(xdist) + abs(ydist)
-        return distances[yCoord][xCoord][0] + h
+        return h
