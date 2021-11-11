@@ -15,12 +15,12 @@ class Maze:
         self.dim = dim
         self.target = ()
         self.maze = self.createMaze()
-        #self.maze = np.array([['L', 'L', 'F'], ['X', 'F', 'H'], ['X', 'F', 'H']])
+        #self.maze = np.array([['L', 'X', 'F'], ['F', 'X', 'F'], ['F', 'F', 'L']])
 
         # Make the target
         self.targetType = targetType
         self.target = self.createTarget()
-        #self.target = (1, 2)
+        #self.target = (2, 1)
 
     """
     createMaze - Fill out map matrix with values representing terrain and target
@@ -39,7 +39,7 @@ class Maze:
                         mat[i][j] = "L"  # Flat
                     elif 0.33 < terrain <= 0.67:
                         mat[i][j] = "H"  # Hilly
-                    elif terrain > 0.67: 
+                    elif terrain > 0.67:
                         mat[i][j] = "F"  # Forest
 
         terrain = np.random.randint(3)

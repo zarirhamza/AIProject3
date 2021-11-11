@@ -53,7 +53,7 @@ class Agent6:
         maxVal_x = np.unravel_index(np.argmax(self.probMatrix, axis=None), self.probMatrix.shape)[1]
         maxVal_y = np.unravel_index(np.argmax(self.probMatrix, axis=None), self.probMatrix.shape)[0]
 
-        maxValues = [(maxVal_x, maxVal_y)]
+        maxValues = []
 
         for i in range(self.dim):
             for j in range(self.dim):
@@ -68,6 +68,8 @@ class Agent6:
                     elif self.mDistance(currCell[0], currCell[1], i, j) == self.mDistance(currCell[0], currCell[1],
                                                                                           maxVal_x, maxVal_y):
                         maxValues.append((i, j))
+
+        #print("Cell best choices: {}".format(maxValues))
 
         randVal = random.randint(1, len(maxValues)) - 1
         return maxValues[randVal]
@@ -124,7 +126,6 @@ class Agent6:
             # If no path found, mark off target as unreachable (blocked)
             elif not discovered and stopPoint == (-1, -1):
                 iterations += 1
-
                 self.probMatrix[tempTarget[1]][tempTarget[0]] = 0
                 self.probMatrix = np.asarray([
                     [val if val == 0 else val + (1 / (self.numUnblocked * (self.numUnblocked - 1))) for val in row] for
@@ -144,6 +145,15 @@ class Agent6:
                 hq.heappush(fringe, start)
                 gn = [[(np.inf, None) for i in range(self.dim)] for j in range(self.dim)]
                 gn[stopPoint[1]][stopPoint[0]] = (0, (gn[stopPoint[1]][stopPoint[0]][1]))
+
+            #print("Known maze: \n{}".format(self.blankMaze))
+            #print("Probability Matrix: \n{}".format(self.probMatrix))
+            #print("Target Cell: {}".format(tempTarget))
+            #print("Current Cell: {}".format(currentCell))
+            #print("Stopped Cell: {}".format(stopPoint))
+            #print()
+
+            #input()
 
     """
     createChildren - Generates children of given point and stores in (gn,x,y) form in fringe when needed 
@@ -203,30 +213,22 @@ class Agent6:
     :param path: Proposed path to iterate through
     """
     def checkPath(self, path):
-
         # No path passed in means target is unreachable
         if not path:
             return False, (-1, -1)
 
         # Iterate through path adding information when necessary
         for i in range(len(path)):
+
             global iterations
             newCell = False
+
+            #print("path {} is {} and target is {} and len is {}".format(i, path[i], self.targetCell, len(path)))
 
             # Update knowledge if cell is unvisited
             if self.blankMaze[path[i][1]][path[i][0]] == 0:
                 self.blankMaze[path[i][1]][path[i][0]] = self.fullMaze[path[i][1]][path[i][0]]
                 newCell = True
-
-            # Check if cell being moved into is the target cell
-            if (i > 0 or i == len(path) - 1) and path[i] == self.targetCell:
-                terrainFNR = self.FNRMapping[self.blankMaze[path[i][1]][path[i][0]]]
-                p = random.uniform(0, 1)
-                # Only find target if greater than FNR
-                if p > terrainFNR:
-                    self.probMatrix = np.zeros([self.dim, self.dim], dtype=object)
-                    self.probMatrix[path[i][1]][path[i][0]] = 1
-                    return True, path[i]
 
             # If blockage found, update knowledge and stop path
             if newCell and self.blankMaze[path[i][1]][path[i][0]] == 'X':
@@ -239,15 +241,28 @@ class Agent6:
                 return False, path[i - 1]
 
             # Otherwise move into new cell in path and update probability based on Q2
-            elif i > 0 or i == len(path) - 1:
+            elif newCell or i == len(path) - 1:
                 iterations += 1
-                self.probMatrix[path[i][1]][path[i][0]] *= self.FNRMapping[
-                    self.blankMaze[path[i][1]][path[i][0]]]
+                self.probMatrix[path[i][1]][path[i][0]] *= self.FNRMapping[self.blankMaze[path[i][1]][path[i][0]]]
                 probSum = np.sum(self.probMatrix)
                 self.probMatrix = self.probMatrix / probSum
+
                 # Check if new maximum probability and return end of path if so
-                if self.checkMaxChanged(path[-1]):
+                if i != len(path) - 1 and self.checkMaxChanged(path[-1]):
                     return False, path[i]
+
+            # Check if cell being moved into is the target cell
+            if i == len(path) - 1 and path[i] == self.targetCell:
+                terrainFNR = self.FNRMapping[self.blankMaze[path[i][1]][path[i][0]]]
+                p = random.uniform(0, 1)
+                # Only find target if greater than FNR
+                #print("TerrainFNR: {} and p-value: {}".format(terrainFNR, p))
+                if p > terrainFNR:
+                    self.probMatrix = np.zeros([self.dim, self.dim], dtype=object)
+                    self.probMatrix[path[i][1]][path[i][0]] = 1
+                    return True, path[i]
+
+
 
         # Goal not found and return last point to start A* from
         return False, path[-1]
