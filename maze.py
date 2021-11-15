@@ -118,7 +118,9 @@ class Maze:
         neighbors = []
         for move in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
             neighbor = (loc[0] + move[0], loc[1] + move[1])
-            if 0 <= neighbor[0] < self.dim and 0 <= neighbor[1] < self.dim and self.maze[neighbor[1]][
-                neighbor[0]] != 'X':
+            if 0 <= neighbor[0] < self.dim and 0 <= neighbor[1] < self.dim and self.maze[neighbor[1]][neighbor[0]] != 'X':
                 neighbors.append(neighbor)
         return neighbors
+
+
+

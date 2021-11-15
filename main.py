@@ -3,31 +3,37 @@ from maze import Maze
 from agent6 import Agent6
 from agent7 import Agent7
 from agent8 import Agent8
+from agent9 import Agent9
 
 
 def main():
     pathsMadeA6 = 0
     pathsMadeA7 = 0
     pathsMadeA8 = 0
+    pathsMadeA9 = 0
 
     cellsProcessedA6 = 0
     cellsProcessedA7 = 0
     cellsProcessedA8 = 0
+    cellsProcessedA9 = 0
 
     iterationsA6 = 0
     iterationsA7 = 0
     iterationsA8 = 0
+    iterationsA9 = 0
 
     cellsTraveledA6 = 0
     cellsTraveledA7 = 0
     cellsTraveledA8 = 0
+    cellsTraveledA9 = 0
 
     A6Time = 0
     A7Time = 0
     A8Time = 0
+    A9Time = 0
 
-    N = 10 #Times test is run
-    Dimension = 25 #Dimension of the matrix
+    N = 10  #Times test is run
+    Dimension = 15 #Dimension of the matrix
     TargetType = "random"# "random" // "forest" // "hill" // "flat"
 
     for i in range(N):
@@ -42,6 +48,7 @@ def main():
         a6 = Agent6(m)
         a7 = Agent7(m)
         a8 = Agent8(m)
+        a9 = Agent9(m)
 
         start = timeit.default_timer()
         iterations, cellsProcessed, stackPath = a6.run()
@@ -85,6 +92,18 @@ def main():
 
         # print(stackPath)
 
+        start = timeit.default_timer()
+        iterations, cellsProcessed, stackPath = a9.run()
+        stop = timeit.default_timer()
+        A9Time += (stop - start)
+
+        iterationsA9 += iterations
+        cellsProcessedA9 += cellsProcessed
+        pathsMadeA9 += len(stackPath)
+
+        # Flatten list of paths to get all cells traveled
+        cellsTraveledA9 += len([item for sublist in stackPath for item in sublist])
+
     print("Agent 6 iterations: {}".format(iterationsA6 / N))
     print("Agent 6 cellsProcessed: {}".format(cellsProcessedA6 / N))
     print("Agent 6 pathsTraveled: {}".format(pathsMadeA6 / N))
@@ -107,6 +126,13 @@ def main():
     print("Agent 8 cellsTraveled: {}".format(cellsTraveledA8 / N))
     print("Agent 8 Time: {}".format(A8Time / N))
 
+    print()
+
+    print("Agent 9 iterations: {}".format(iterationsA9 / N))
+    print("Agent 9 cellsProcessed: {}".format(cellsProcessedA9 / N))
+    print("Agent 9 pathsTraveled: {}".format(pathsMadeA9 / N))
+    print("Agent 9 cellsTraveled: {}".format(cellsTraveledA9 / N))
+    print("Agent 9 Time: {}".format(A9Time / N))
 
 if __name__ == "__main__":
     main()
